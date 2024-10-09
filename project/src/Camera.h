@@ -76,16 +76,26 @@ namespace dae
 				origin += right * movementSpeed * deltaTime;
 			}
 
+			if (mouseState == 5)
+			{
+				origin.y -= mouseY * movementSpeed * deltaTime;
+			}
 			if (mouseState == 4)
 			{
 				totalPitch += mouseY * rotationSpeed * deltaTime;
 				totalYaw += mouseX * rotationSpeed * deltaTime;
 			}
+			if (mouseState == 1)
+			{
+				origin -= forward * mouseY * movementSpeed * deltaTime;
+				totalYaw += mouseX * rotationSpeed * deltaTime;
+			}
+
 
 			float totalPitchRad{ totalPitch * (PI / 180.f) };
 			float totalYawRad{ totalYaw * (PI / 180.f) };
 
-			Matrix rot{ Matrix::CreateRotationY(totalYawRad) * Matrix::CreateRotationX(totalPitchRad) };
+			Matrix rot{ Matrix::CreateRotationX(totalPitchRad) * Matrix::CreateRotationY(totalYawRad) };
 
 			forward = rot.TransformVector(Vector3::UnitZ);
 			forward.Normalize();

@@ -29,47 +29,40 @@ namespace dae {
 	void dae::Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
 	{
 		//todo W1
-		float closestHitT{ray.max};
-		unsigned char material{};
+		HitRecord closestHitTemp{};
+		closestHit.t = ray.max;
 
 		for (int idx{}; idx < m_SphereGeometries.size(); idx++)
 		{
-			GeometryUtils::HitTest_Sphere(m_SphereGeometries.at(idx), ray, closestHit);
+			GeometryUtils::HitTest_Sphere(m_SphereGeometries.at(idx), ray, closestHitTemp);
 
-			if (closestHit.t < closestHitT)
+			if (closestHitTemp.t <= closestHit.t and closestHitTemp.didHit)
 			{
-				closestHitT = closestHit.t;
-				material = closestHit.materialIndex;
+				closestHit = closestHitTemp;
 			}
 		}
 
 		for (int idx{}; idx < m_PlaneGeometries.size(); idx++)
 		{
-			GeometryUtils::HitTest_Plane(m_PlaneGeometries.at(idx), ray, closestHit);
+			GeometryUtils::HitTest_Plane(m_PlaneGeometries.at(idx), ray, closestHitTemp);
 
-			if (closestHit.t < closestHitT)
+			if (closestHitTemp.t <= closestHit.t and closestHitTemp.didHit)
 			{
-				closestHitT = closestHit.t;
-				material = closestHit.materialIndex;
+				closestHit = closestHitTemp;
 			}
 		}
-
-		closestHit.t = closestHitT;
-		closestHit.materialIndex = material;
 	}
 
 	bool Scene::DoesHit(const Ray& ray) const
 	{
-		HitRecord temp{};
-
 		for (int idx{}; idx < m_SphereGeometries.size(); idx++)
 		{
-			if (GeometryUtils::HitTest_Sphere(m_SphereGeometries.at(idx), ray, temp)) return true; 
+			if (GeometryUtils::HitTest_Sphere(m_SphereGeometries.at(idx), ray)) return true; 
 		}
 
 		for (int idx{}; idx < m_PlaneGeometries.size(); idx++)
 		{
-			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries.at(idx), ray, temp)) return true;
+			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries.at(idx), ray)) return true;
 		}
 		
 		return false;

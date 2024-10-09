@@ -64,9 +64,8 @@ void Renderer::Render(Scene* pScene) const
 					Vector3 lightDirection{ LightUtils::GetDirectionToLight(lights[light], closestHit.origin)};
 					float magnitude{ lightDirection.Magnitude() };
 
-					Ray lightRay{ closestHit.origin + closestHit.normal, lightDirection.Normalized()};
+					Ray lightRay{ closestHit.origin + (closestHit.normal / 100.f), lightDirection.Normalized() };
 					lightRay.max = magnitude;
-					//lightRay.min = 1.f;
 
 					if (pScene->DoesHit(lightRay))
 					{

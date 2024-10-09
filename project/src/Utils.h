@@ -11,24 +11,22 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			Vector3 L{ ray.origin - sphere.origin };
+			Vector3 raySphere{ ray.origin - sphere.origin };
 
 			float A{ Vector3::Dot(ray.direction, ray.direction)};
 
-			Vector3 test{ 2 * ray.direction};
-			float B{ Vector3::Dot(test, L) };
+			float B{ Vector3::Dot((2 * ray.direction), raySphere) };
 
-			float C{ Vector3::Dot(L, L) - Square(sphere.radius) };
+			float C{ Vector3::Dot(raySphere, raySphere) - Square(sphere.radius) };
 
 			float discriminant{ Square(B) - 4 * A * C};
 
 
-			if (discriminant > 0 and !ignoreHitRecord)
+			if (discriminant > 0)
 			{
 				float sqrtDiscriminant{ sqrt(discriminant) };
 				float t0{ (-B - sqrtDiscriminant) / (2 * A) };
 				float t1{ (-B + sqrtDiscriminant) / (2 * A) };
-
 
 				if (t0 >= ray.min and t0 < ray.max )
 				{
