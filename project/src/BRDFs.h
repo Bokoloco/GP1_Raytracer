@@ -1,5 +1,7 @@
 #pragma once
 #include "Maths.h"
+#include <cmath>
+#include <iostream>
 
 namespace dae
 {
@@ -13,15 +15,15 @@ namespace dae
 		static ColorRGB Lambert(float kd, const ColorRGB& cd)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			ColorRGB rho{ kd * cd };
+			return {rho / PI};
 		}
 
 		static ColorRGB Lambert(const ColorRGB& kd, const ColorRGB& cd)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			ColorRGB rho{ cd * kd };
+			return {rho / PI};
 		}
 
 		/**
@@ -36,8 +38,10 @@ namespace dae
 		static ColorRGB Phong(float ks, float exp, const Vector3& l, const Vector3& v, const Vector3& n)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			Vector3 reflect{ l - (2 * Vector3::Dot(l, n) * n)};
+			float cos{ std::max(0.f,Vector3::Dot(reflect.Normalized(), v))};
+			float phongSpecularReflection{ ks * std::powf(cos, exp) };
+			return  phongSpecularReflection * colors::White;
 		}
 
 		/**
@@ -50,8 +54,8 @@ namespace dae
 		static ColorRGB FresnelFunction_Schlick(const Vector3& h, const Vector3& v, const ColorRGB& f0)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			ColorRGB secondPart{ (ColorRGB{1.f, 1.f, 1.f} - f0) * std::powf((1.f - Vector3::Dot(h, v)), 5) };
+			return {f0 + secondPart};
 		}
 
 		/**
@@ -64,8 +68,9 @@ namespace dae
 		static float NormalDistribution_GGX(const Vector3& n, const Vector3& h, float roughness)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			float a{ Square(roughness) };
+			float denominator{ PI * Square(Square(Vector3::Dot(n, h)) * (Square(a) - 1.f) + 1.f) };
+			return {Square(a) / denominator};
 		}
 
 
@@ -79,8 +84,11 @@ namespace dae
 		static float GeometryFunction_SchlickGGX(const Vector3& n, const Vector3& v, float roughness)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			float a{ Square(roughness) };
+			float k{ Square(a + 1.f) / 8.f };
+			float dotNV{ Vector3::Dot(n, v) };
+			float denominator{ (dotNV * (1.f - k)) + k };
+			return {dotNV / denominator};
 		}
 
 		/**
@@ -94,8 +102,7 @@ namespace dae
 		static float GeometryFunction_Smith(const Vector3& n, const Vector3& v, const Vector3& l, float roughness)
 		{
 			//todo: W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			return {GeometryFunction_SchlickGGX(n, v, roughness) * GeometryFunction_SchlickGGX(n, l, roughness)};
 		}
 
 	}
