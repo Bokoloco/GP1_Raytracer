@@ -89,9 +89,53 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			throw std::runtime_error("Not Implemented Yet");
-			return false;
+			float dotNormalDir{ Vector3::Dot(triangle.normal, ray.direction) };
+
+			if (AreEqual(dotNormalDir, 0.f)) return false;
+			
+			if (!ignoreHitRecord)
+			{
+				if ((triangle.cullMode == TriangleCullMode::BackFaceCulling and dotNormalDir > 0)
+					or (triangle.cullMode == TriangleCullMode::FrontFaceCulling and dotNormalDir < 0)) return false;
+			}
+			else
+			{
+				if ((triangle.cullMode == TriangleCullMode::BackFaceCulling and dotNormalDir <= 0)
+					or (triangle.cullMode == TriangleCullMode::FrontFaceCulling and dotNormalDir >= 0)) return false;
+			}
+
+			Vector3 L{ triangle.v0 - ray.origin };
+			float t{ Vector3::Dot(L, triangle.normal) / Vector3::Dot(ray.direction, triangle.normal) };
+
+			if (t < ray.min or t > ray.max) return false;
+
+			Vector3 point{ ray.origin + (ray.direction * t) };
+
+			Vector3 vectors[3]{ triangle.v0, triangle.v1, triangle.v2 };
+			for (int vectorIdx{}; vectorIdx < 3; ++vectorIdx)
+			{
+				Vector3 e{};
+
+				if (vectorIdx == 2) e = vectors[0] - vectors[vectorIdx];
+				else e = vectors[vectorIdx + 1] - vectors[vectorIdx];
+
+				Vector3 p{ point - vectors[vectorIdx] };
+
+				Vector3 cross{ Vector3::Cross(e, p) };
+
+				if (Vector3::Dot(cross, triangle.normal) < 0) return false;
+			}
+
+			if (!ignoreHitRecord)
+			{
+				hitRecord.didHit = true;
+				hitRecord.materialIndex = triangle.materialIndex;
+				hitRecord.normal = triangle.normal;
+				hitRecord.origin = triangle.v0;
+				hitRecord.t = t;
+			}
+
+			return true;
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
@@ -104,8 +148,13 @@ namespace dae
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//todo W5
-			throw std::runtime_error("Not Implemented Yet");
-			return false;
+			for (int idx{}; idx < mesh.indices.size(); idx += 3)
+			{
+				Triangle test{ mesh.transformedPositions[idx], mesh.transformedPositions[idx + 1], mesh.transformedPositions[idx + 2], mesh.transformedNormals[idx / 3.f] };
+				test.cullMode = mesh.cullMode;
+				test.materialIndex = mesh.materialIndex;
+				return HitTest_Triangle(test, ray, hitRecord, ignoreHitRecord);
+			}
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
