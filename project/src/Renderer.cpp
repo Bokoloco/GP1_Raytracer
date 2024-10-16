@@ -54,22 +54,39 @@ void Renderer::Render(Scene* pScene) const
 
 			if (closestHit.didHit)
 			{
-				finalColor = materials[closestHit.materialIndex]->Shade();
-
-				/*const float scaled_t = (closestHit.t / 500.f);
-				finalColor = { scaled_t, scaled_t, scaled_t };*/
+				finalColor = {};
 
 				for (int light{}; light < lights.size(); ++light)
 				{
-					Vector3 lightDirection{ LightUtils::GetDirectionToLight(lights[light], closestHit.origin)};
-					float magnitude{ lightDirection.Magnitude() };
 
-					Ray lightRay{ closestHit.origin + (closestHit.normal / 100.f), lightDirection.Normalized() };
+					Vector3 directionToLight{ LightUtils::GetDirectionToLight(lights[light], closestHit.origin)};
+					float magnitude{ directionToLight.Normalize() };
+
+					Ray lightRay{ closestHit.origin + (directionToLight * .01f), directionToLight };
 					lightRay.max = magnitude;
 
-					if (pScene->DoesHit(lightRay))
+					float dot{ Vector3::Dot(closestHit.normal, directionToLight) };
+
+					if (dot <= 0.f) continue;
+
+					if (pScene->DoesHit(lightRay) and m_ShadowsEnabled) continue;
+
+					switch (m_CurrentLightingMode)
 					{
-						finalColor *= 0.5f;
+					case dae::Renderer::LightingMode::ObservationArea:
+						finalColor += dot * ColorRGB{1.f, 1.f, 1.f};
+						break;
+					case dae::Renderer::LightingMode::Radiance:
+						finalColor += LightUtils::GetRadiance(lights[light], closestHit.origin);
+						break;
+					case dae::Renderer::LightingMode::BRDF:
+						finalColor += materials[closestHit.materialIndex]->Shade(closestHit, directionToLight, -viewRay.direction);
+						break;
+					case dae::Renderer::LightingMode::Combined:
+						finalColor += LightUtils::GetRadiance(lights[light], closestHit.origin) * materials[closestHit.materialIndex]->Shade(closestHit, directionToLight, -viewRay.direction) * dot;
+						break;
+					default:
+						break;
 					}
 				}
 			}
@@ -92,4 +109,24 @@ void Renderer::Render(Scene* pScene) const
 bool Renderer::SaveBufferToImage() const
 {
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
+}
+
+void Renderer::CycleLightingMode()
+{
+	int lightingStateInt{ int(m_CurrentLightingMode) };
+	m_CurrentLightingMode = LightingMode((lightingStateInt + 1) % 4);
+}
+
+void Renderer::CheckKeysInput()
+{
+	const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+
+	if (pKeyboardState[SDL_SCANCODE_F2])
+	{
+		ToggleShadows();
+	}
+	if (pKeyboardState[SDL_SCANCODE_F3])
+	{
+		CycleLightingMode();
+	}
 }

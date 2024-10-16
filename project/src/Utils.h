@@ -22,13 +22,13 @@ namespace dae
 			float discriminant{ Square(B) - 4 * A * C};
 
 
-			if (discriminant > 0)
+			if (discriminant >= 0)
 			{
 				float sqrtDiscriminant{ sqrt(discriminant) };
 				float t0{ (-B - sqrtDiscriminant) / (2 * A) };
 				float t1{ (-B + sqrtDiscriminant) / (2 * A) };
 
-				if (t0 >= ray.min and t0 < ray.max )
+				if (t0 >= ray.min and t0 <= ray.max )
 				{
 					hitRecord.t = t0;
 					hitRecord.didHit = true;
@@ -38,7 +38,7 @@ namespace dae
 					hitRecord.normal = test.Normalized();
 					return true;
 				}
-				else if (t1 >= ray.min and t1 < ray.max)
+				else if (t1 >= ray.min and t1 <= ray.max)
 				{
 					hitRecord.t = t1;
 					hitRecord.didHit = true;
@@ -122,14 +122,30 @@ namespace dae
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
 			//todo W3
-			return { light.origin - origin };
+			if (light.type == LightType::Point)
+			{
+				return { light.origin - origin };
+			}
+			else
+			{
+				return {};
+			}
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
 			//todo W3
-			throw std::runtime_error("Not Implemented Yet");
-			return {};
+			if (light.type == LightType::Point)
+			{
+				Vector3 huh{ light.origin - target };
+				float irradiance{ light.intensity / huh.SqrMagnitude() };
+
+				return { light.color * irradiance };
+			}
+			else
+			{
+				return {};
+			}
 		}
 	}
 
