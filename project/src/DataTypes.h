@@ -130,15 +130,14 @@ namespace dae
 				int ind2{ indices[idx + 1] };
 				int ind3{ indices[idx + 2] };
 
-				Vector3 v1{ positions[ind1] };
-				Vector3 v2{ positions[ind2] };
-				Vector3 v3{ positions[ind3] };
+				Vector3 v0{ positions[ind1] };
+				Vector3 v1{ positions[ind2] };
+				Vector3 v2{ positions[ind3] };
 
-				Vector3 a{ v2 - v1 };
-				Vector3 b{ v3 - v1 };
+				Vector3 a{ v1 - v0 };
+				Vector3 b{ v2 - v0 };
 
-				Vector3 normal{ Vector3::Cross(a, b) };
-				normal.Normalize();
+				Vector3 normal{ Vector3::Cross(a, b).Normalized()};
 
 				normals.push_back(normal);
 			}
@@ -146,16 +145,33 @@ namespace dae
 
 		void UpdateTransforms()
 		{
-			Matrix transform{ translationTransform * rotationTransform * scaleTransform };
+			Matrix transform{ scaleTransform * rotationTransform * translationTransform };
 
-			for (int idx{}; idx < normals.size(); ++idx)
+			if (transformedNormals.size() == 0)
 			{
-				transformedNormals.push_back(transform.TransformVector(Vector4{ normals[idx], 0.f }));
+				for (int idx{}; idx < positions.size(); ++idx)
+				{
+					transformedPositions.push_back(transform.TransformPoint(positions[idx]));
+					//transformedPositions.push_back(positions[idx]);
+				}
+
+				for (int idx{}; idx < normals.size(); ++idx)
+				{
+					transformedNormals.push_back(transform.TransformVector(normals[idx]));
+					//transformedNormals.push_back( normals[idx]);
+				}
 			}
-
-			for (int idx{}; idx < positions.size(); ++idx)
+			else
 			{
-				transformedPositions.push_back(transform.TransformVector(Vector4{ positions[idx], 0.f }));
+				for (int idx{}; idx < positions.size(); ++idx)
+				{
+					transformedPositions[idx] = transform.TransformPoint(positions[idx]);
+				}
+
+				for (int idx{}; idx < normals.size(); ++idx)
+				{
+					transformedNormals[idx] = transform.TransformVector(normals[idx]);
+				}
 			}
 		}
 	};

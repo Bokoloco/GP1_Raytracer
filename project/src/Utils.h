@@ -131,7 +131,7 @@ namespace dae
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = triangle.materialIndex;
 				hitRecord.normal = triangle.normal;
-				hitRecord.origin = triangle.v0;
+				hitRecord.origin = ray.origin + (t * ray.direction);
 				hitRecord.t = t;
 			}
 
@@ -148,13 +148,17 @@ namespace dae
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//todo W5
+			bool huh{};
+			HitRecord closestHit{};
 			for (int idx{}; idx < mesh.indices.size(); idx += 3)
 			{
-				Triangle test{ mesh.transformedPositions[idx], mesh.transformedPositions[idx + 1], mesh.transformedPositions[idx + 2], mesh.transformedNormals[idx / 3.f] };
+				Triangle test{ mesh.transformedPositions[mesh.indices[idx]], mesh.transformedPositions[mesh.indices[idx + 1]], mesh.transformedPositions[mesh.indices[idx + 2]], mesh.transformedNormals[idx / 3] };
 				test.cullMode = mesh.cullMode;
 				test.materialIndex = mesh.materialIndex;
-				return HitTest_Triangle(test, ray, hitRecord, ignoreHitRecord);
+				if (HitTest_Triangle(test, ray, closestHit, ignoreHitRecord)) huh = true;
+				if (closestHit.t < hitRecord.t and closestHit.didHit) hitRecord = closestHit;
 			}
+			return huh;
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
