@@ -37,6 +37,8 @@ namespace dae
 		void GetClosestHit(const Ray& ray, HitRecord& closestHit) const;
 		bool DoesHit(const Ray& ray) const;
 
+		void ChangeScene();
+
 		const std::vector<Plane>& GetPlaneGeometries() const { return m_PlaneGeometries; }
 		const std::vector<Sphere>& GetSphereGeometries() const { return m_SphereGeometries; }
 		const std::vector<Light>& GetLights() const { return m_Lights; }
@@ -126,5 +128,42 @@ namespace dae
 		TriangleMesh* pMesh{ nullptr };
 
 		TriangleMesh* m_Meshes[3]{};
+	};
+
+	class Scene_SphereScene final : public Scene
+	{
+	public:
+		Scene_SphereScene() = default;
+		~Scene_SphereScene() override = default;
+
+		Scene_SphereScene(const Scene_SphereScene&) = delete;
+		Scene_SphereScene(Scene_SphereScene&&) noexcept = delete;
+		Scene_SphereScene& operator=(const Scene_SphereScene&) = delete;
+		Scene_SphereScene& operator=(Scene_SphereScene&&) noexcept = delete;
+
+		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+
+		TriangleMesh* m_Meshes[3]{};
+	};
+
+	class Scene_BunnyScene final : public Scene
+	{
+	public:
+		Scene_BunnyScene() = default;
+		~Scene_BunnyScene() override = default;
+
+		Scene_BunnyScene(const Scene_BunnyScene&) = delete;
+		Scene_BunnyScene(Scene_BunnyScene&&) noexcept = delete;
+		Scene_BunnyScene& operator=(const Scene_BunnyScene&) = delete;
+		Scene_BunnyScene& operator=(Scene_BunnyScene&&) noexcept = delete;
+
+		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+		TriangleMesh* pMesh{ nullptr };
 	};
 }

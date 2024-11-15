@@ -15,9 +15,7 @@ namespace dae
 		Camera(const Vector3& _origin, float _fovAngle) :
 			origin{ _origin },
 			fovAngle{ _fovAngle }
-		{
-		}
-
+		{}
 
 		Vector3 origin{};
 		float fovAngle{ 90.f };
@@ -30,18 +28,13 @@ namespace dae
 		float totalYaw{ 0.f };
 
 		Matrix cameraToWorld{};
-		Vector3 test{origin};
-
 
 		Matrix CalculateCameraToWorld()
 		{
 			right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
 			up = Vector3::Cross(forward, right).Normalized();
 
-			Matrix matrix{ {right, 0}, {up, 0}, {forward, 0}, {origin, 1} };
-			cameraToWorld = matrix;
-
-			return matrix;
+			return Matrix{ {right, 0}, {up, 0}, {forward, 0}, {origin, 1} };
 		}
 
 		void Update(Timer* pTimer)
@@ -92,8 +85,8 @@ namespace dae
 			}
 
 
-			float totalPitchRad{ totalPitch * (PI / 180.f) };
-			float totalYawRad{ totalYaw * (PI / 180.f) };
+			float totalPitchRad{ totalPitch * TO_RADIANS };
+			float totalYawRad{ totalYaw * TO_RADIANS };
 
 			Matrix rot{ Matrix::CreateRotationX(totalPitchRad) * Matrix::CreateRotationY(totalYawRad) };
 

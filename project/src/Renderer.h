@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include "Maths.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -21,12 +22,11 @@ namespace dae
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void Render(Scene* pScene) const;
-		void RenderPixel(Scene* pScene, uint32_t pixelIndex, float fov, float aspectRatio, const Matrix cameraToWorld, const Vector3 cameraOrigin) const;
+		void RenderPixel(Scene* pScene, uint32_t pixelIndex, float fov, float aspectRatio, const Matrix& cameraToWorld, const Vector3& cameraOrigin) const;
 		bool SaveBufferToImage() const;
 
 		void CycleLightingMode();
 		void ToggleShadows() { m_ShadowsEnabled = !m_ShadowsEnabled; }
-		void CheckKeysInput();
 				
 		private:
 		enum class LightingMode

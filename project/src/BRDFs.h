@@ -41,7 +41,7 @@ namespace dae
 			Vector3 reflect{ l - (2 * Vector3::Dot(l, n) * n)};
 			float cos{ std::max(0.f,Vector3::Dot(reflect.Normalized(), v))};
 			float phongSpecularReflection{ ks * std::powf(cos, exp) };
-			return  phongSpecularReflection * colors::White;
+			return  phongSpecularReflection * ColorRGB{1.f, 1.f, 1.f};
 		}
 
 		/**
@@ -54,8 +54,8 @@ namespace dae
 		static ColorRGB FresnelFunction_Schlick(const Vector3& h, const Vector3& v, const ColorRGB& f0)
 		{
 			//todo: W3
-			ColorRGB secondPart{ (ColorRGB{1.f, 1.f, 1.f} - f0) * std::powf((1.f - Vector3::Dot(h, v)), 5) };
-			return {f0 + secondPart};
+			ColorRGB secondPartFunction{ (ColorRGB{1.f, 1.f, 1.f} - f0) * std::powf((1.f - Vector3::Dot(h, v)), 5) };
+			return {f0 + secondPartFunction };
 		}
 
 		/**

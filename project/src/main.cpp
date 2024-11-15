@@ -16,6 +16,8 @@
 
 using namespace dae;
 
+enum class Scenes {SpehereScene, BunnyScene};
+
 void ShutDown(SDL_Window* pWindow)
 {
 	SDL_DestroyWindow(pWindow);
@@ -47,8 +49,13 @@ int main(int argc, char* args[])
 	const auto pTimer = new Timer();
 	const auto pRenderer = new Renderer(pWindow);
 
-	const auto pScene = new Scene_W4();
-	pScene->Initialize();
+	const auto pSceneBunny = new Scene_BunnyScene();
+	pSceneBunny->Initialize();
+
+	const auto pSceneSphere = new Scene_SphereScene();
+	pSceneSphere->Initialize();
+
+	Scenes currentScene{Scenes::SpehereScene};
 
 	//Start loop
 	pTimer->Start();
@@ -81,16 +88,30 @@ int main(int argc, char* args[])
 				{
 					pRenderer->CycleLightingMode();
 				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F4)
+				{
+					int current{ int(currentScene) };
+					currentScene = Scenes((current + 1) % 2);
+				}
 				break;
 			}
 		}
 
 		//--------- Update ---------
-		pScene->Update(pTimer);
-
 		//--------- Render ---------
-		//pRenderer->CheckKeysInput();
-		pRenderer->Render(pScene);
+		switch (currentScene)
+		{
+		case Scenes::SpehereScene:
+			pSceneSphere->Update(pTimer);
+			pRenderer->Render(pSceneSphere);
+			break;
+		case Scenes::BunnyScene:
+			pSceneBunny->Update(pTimer);
+			pRenderer->Render(pSceneBunny);
+			break;
+		default:
+			break;
+		}
 
 		//--------- Timer ---------
 		pTimer->Update();
@@ -114,7 +135,8 @@ int main(int argc, char* args[])
 	pTimer->Stop();
 
 	//Shutdown "framework"
-	delete pScene;
+	delete pSceneBunny;
+	delete pSceneSphere;
 	delete pRenderer;
 	delete pTimer;
 
